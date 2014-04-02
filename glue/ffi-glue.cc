@@ -47,7 +47,7 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
   } else if (v.type == &ffi_type_pointer) {
     out << v.value.ptr;
   }
-  out << std::endl;
+  out << "\n$";
   return out;
 }
 
