@@ -8,10 +8,10 @@ ffi-glue : ffi-glue.o
 
 ffi-glue.o : ffi-glue.cc
 
-.PHONY : indent clean test
+.PHONY : format clean test
 
-indent :
-	$(FORMAT) -style=google -i *.cc *.hh
+format :
+	$(FORMAT) -style=google -i *.cc
 
 clean :
 	$(RM) *.o ffi-glue

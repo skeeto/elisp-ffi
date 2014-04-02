@@ -172,9 +172,7 @@ class Machine {
     out_.write(data, size);
   }
 
-  void free() {
-    delete static_cast<char*>(stack.pop().value.ptr);
-  }
+  void free() { delete static_cast<char *>(stack.pop().value.ptr); }
 
  private:
   std::ostream &out_;
