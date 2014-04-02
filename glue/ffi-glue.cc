@@ -115,7 +115,7 @@ class Machine {
   Machine(std::ostream &out) : out_{out} {};
   ~Machine() {
     for (auto &i : cifs_) {
-      //delete i->arg_types;
+      delete i->arg_types;
       delete i;
     }
     for (auto &i : libs_) {
@@ -146,11 +146,12 @@ class Machine {
   void cif() {
     ffi_cif *cif = new ffi_cif;
     uint32_t nargs = stack.pop().value.u32;
+    ffi_type *rtype = stack.pop().type;
     ffi_type **types = new ffi_type*[nargs];
-    for (uint32_t i = 0; i < nargs + 1; i++) {
+    for (uint32_t i = 0; i < nargs; i++) {
       types[i] = stack.pop().type;
     }
-    ffi_prep_cif(cif, FFI_DEFAULT_ABI, nargs, types[0], types + 1);
+    ffi_prep_cif(cif, FFI_DEFAULT_ABI, nargs, rtype, types);
     stack.push(cif);
     cifs_.push_back(cif);
   }
