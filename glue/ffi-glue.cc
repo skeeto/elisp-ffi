@@ -119,7 +119,7 @@ class Machine {
       delete i;
     }
     for (auto &i : libs_) {
-      dlclose(i);
+      if (i) dlclose(i);
     }
   };
 
@@ -384,6 +384,8 @@ int main() {
 
       /* no-op */
       case ' ':
+      case '\n':
+      case '\r':
       case -1:
         break;
 
