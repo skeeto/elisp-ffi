@@ -180,7 +180,7 @@ class Machine {
 
   void dump() {
     uint32_t size = stack.pop().value.u32;
-    char *data = static_cast<char *>(stack.peek().value.ptr);
+    char *data = static_cast<char *>(stack.pop().value.ptr);
     out_.write(data, size);
   }
 
