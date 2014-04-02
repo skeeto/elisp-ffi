@@ -1,16 +1,20 @@
-CFLAGS = -W -Wall -Wextra -O2
-LDLIBS = -ldl -lffi
+CXXFLAGS = -std=c++11 -Wall
+LDLIBS = -ldl -lffi -lstdc++
 
-ffi-helper : ffi-helper.o stack.o numpool.o
+CXX = clang++
+FORMAT = clang-format-3.5
 
-stack.o : stack.c stack.h
-numpool.o : numpool.c numpool.h
-ffi-helper.o : ffi-helper.c stack.h numpool.h
+ffi-glue : ffi-glue.o
 
-.PHONY : clean indent
+ffi-glue.o : ffi-glue.cc
+
+.PHONY : indent clean test
 
 indent :
-	indent *.c
+	$(FORMAT) -style=google -i *.cc *.hh
 
 clean :
-	$(RM) *.o ffi-helper
+	$(RM) *.o ffi-glue
+
+test : ffi-glue
+	echo -n 'k0w0CNw4MrandSco' | ./$<
