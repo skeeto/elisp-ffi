@@ -148,6 +148,8 @@ the rest are the argument types."
     (ffi-destroy ffi)))
 
 (ffi-call nil "cos" '(:double :double) 1.2)
+(ffi-call nil "srand" '(:sint32 :uint32) 0)
+(cl-loop repeat 10 collect (ffi-call nil "rand" '(:sint32)))
 
 (provide 'ffi)
 
