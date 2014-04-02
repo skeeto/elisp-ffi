@@ -349,11 +349,6 @@ int main() {
         vm.free();
         break;
 
-      /* push NULL */
-      case 'N':
-        vm.stack.push(nullptr);
-        break;
-
       /* dl calls */
       case 'O':
         vm.dlopen();
