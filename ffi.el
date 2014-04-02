@@ -5,7 +5,7 @@
 (defvar ffi-types
   '(:uint8 :uint16 :uint32 :unit64
     :sint8 :sint16 :sint32 :sint64
-    :float :double :pointer)
+    :float :double :pointer :void)
   "Data type designators.")
 
 (progn
@@ -19,7 +19,8 @@
   (put :sint64  'ffi-code "l")
   (put :float   'ffi-code "f")
   (put :double  'ffi-code "d")
-  (put :pointer 'ffi-code "p"))
+  (put :pointer 'ffi-code "p")
+  (put :void    'ffi-code "V"))
 
 (defvar ffi-data-root (file-name-directory load-file-name)
   "Location of FFI data files")
@@ -40,8 +41,8 @@
          (buffer (generate-new-buffer (format "*%s*" name)))
          (exec (expand-file-name "glue/ffi-glue" ffi-data-root))
          (process (start-process name buffer exec)))
-    ;; (setf (process-sentinel process)
-    ;;       (lambda (proc _) (kill-buffer (process-buffer proc))))
+    (setf (process-sentinel process)
+          (lambda (proc _) (kill-buffer (process-buffer proc))))
     (ffi--create :process process :log (generate-new-buffer "*out*"))))
 
 (defun ffi-destroy (ffi)
@@ -74,6 +75,7 @@
 (defun ffi-push (ffi type value)
   "Push VALUE onto FFI's stack."
   (cond ((null value) (ffi-write ffi "p0"))
+        ((eq type :void) (ffi-write ffi "V"))
         ((stringp value) (ffi-write ffi "w%dM%s" (length value) value))
         ((ffi-write ffi (concat (get type 'ffi-code)
                                 (prin1-to-string value) " ")))))
@@ -98,7 +100,7 @@ the rest are the argument types."
         (let ((standard-output (current-buffer)))
           (dolist (arg (reverse signature))
             (princ (get arg 'ffi-code))
-            (princ "0"))
+            (unless (eq arg :void) (princ "0")))
           (princ "w")
           (princ (1- (length signature)))
           (princ "Co")
@@ -148,7 +150,7 @@ the rest are the argument types."
     (ffi-destroy ffi)))
 
 (ffi-call nil "cos" '(:double :double) 1.2)
-(ffi-call nil "srand" '(:sint32 :uint32) 0)
+(ffi-call nil "srand" '(:void :uint32) 0)
 (cl-loop repeat 10 collect (ffi-call nil "rand" '(:sint32)))
 
 (provide 'ffi)

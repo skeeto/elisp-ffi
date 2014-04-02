@@ -47,6 +47,8 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
     out << v.value.d;
   } else if (v.type == &ffi_type_pointer) {
     out << v.value.ptr;
+  } else if (v.type == &ffi_type_void) {
+    out << ":void";
   }
   out << "\n$";
   return out;
@@ -88,6 +90,9 @@ class FFIStack {
     stack_.push_back(Value{&ffi_type_pointer, {.ptr = v}});
   }
   void push(Value &v) { stack_.push_back(v); }
+  void push() {
+    stack_.push_back(Value{&ffi_type_void, {0}});
+  }
 
   Value pop() {
     Value v = stack_.back();
@@ -320,6 +325,11 @@ int main() {
       /* push pointer */
       case 'p':
         reader.read_pointer();
+        break;
+
+      /* push void */
+      case 'V':
+        vm.stack.push();
         break;
 
       /* peek */
