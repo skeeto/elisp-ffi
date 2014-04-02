@@ -18,6 +18,6 @@ clean :
 
 test : ffi-glue
 	 ## rand()
-	echo -n 'k0w0CNw4MrandSco' | ./$<
+	echo -n 'k0w0Cp0w4MrandSco' | ./$<
 	 ## cos(1.2)
-	echo -n 'd1.2d0d0w1CNw3McosSco' | ./$<
+	echo -n 'd1.2d0d0w1Cp0w3McosSco' | ./$<
