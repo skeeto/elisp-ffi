@@ -17,4 +17,7 @@ clean :
 	$(RM) *.o ffi-glue
 
 test : ffi-glue
+	 ## rand()
 	echo -n 'k0w0CNw4MrandSco' | ./$<
+	 ## cos(1.2)
+	echo -n 'd1.2d0d0w1CNw3McosSco' | ./$<

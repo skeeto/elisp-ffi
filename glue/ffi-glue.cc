@@ -45,9 +45,9 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
   } else if (v.type == &ffi_type_double) {
     out << v.value.d;
   } else if (v.type == &ffi_type_pointer) {
-    out << "[ptr \"" << v.value.ptr << "\"]";
-    // XXX
+    out << v.value.ptr;
   }
+  out << std::endl;
   return out;
 }
 
@@ -96,7 +96,15 @@ class FFIStack {
 
   Value peek() { return stack_.back(); }
 
-  Value &operator[](int i) { return stack_[stack_.size() - i]; }
+  Value &operator[](int i) { return stack_[stack_.size() - i - 1]; }
+
+  void dup() {
+    stack_.push_back(stack_.back());
+  }
+
+  size_t size() {
+    return stack_.size();
+  }
 
  private:
   std::vector<Value> stack_;
@@ -107,6 +115,7 @@ class Machine {
   Machine(std::ostream &out) : out_{out} {};
   ~Machine() {
     for (auto &i : cifs_) {
+      //delete i->arg_types;
       delete i;
     }
     for (auto &i : libs_) {
@@ -137,7 +146,7 @@ class Machine {
   void cif() {
     ffi_cif *cif = new ffi_cif;
     uint32_t nargs = stack.pop().value.u32;
-    ffi_type *types[nargs];
+    ffi_type **types = new ffi_type*[nargs];
     for (uint32_t i = 0; i < nargs + 1; i++) {
       types[i] = stack.pop().type;
     }
@@ -151,12 +160,14 @@ class Machine {
     ffi_cif *cif = static_cast<ffi_cif *>(stack.pop().value.ptr);
     int nargs = cif->nargs;
     void *args[nargs];
-    Value result;
-    result.type = cif->rtype;
+    Value result {cif->rtype, {0}};
     for (int i = 0; i < nargs; i++) {
       args[i] = &stack[i].value;
     }
     ffi_call(cif, function, &result.value, args);
+    for (int i = 0; i < nargs; i++) {
+      stack.pop();
+    }
     stack.push(result);
   }
 
@@ -173,6 +184,11 @@ class Machine {
   }
 
   void free() { delete static_cast<char *>(stack.pop().value.ptr); }
+
+  void size() {
+    uint32_t size = stack.size();
+    stack.push(size);
+  }
 
  private:
   std::ostream &out_;
@@ -239,7 +255,7 @@ class Reader {
 
   void read_pointer() {
     void *ptr = nullptr;
-    // XXX
+    in_ >> ptr;
     vm_.stack.push(ptr);
   }
 
@@ -261,6 +277,7 @@ int main() {
   while (!std::cin.eof()) {
     int command = std::cin.get();
     switch (command) {
+      /* push signed integer */
       case 'i' + 0: /* i */
         reader.read_sint8();
         break;
@@ -274,15 +291,15 @@ int main() {
         reader.read_sint64();
         break;
 
-      /* push unsigned */
+      /* push unsigned integer */
       case 'u' + 0: /* u */
-        reader.read_uint64();
+        reader.read_uint8();
         break;
       case 'u' + 1: /* v */
-        reader.read_uint64();
+        reader.read_uint16();
         break;
       case 'u' + 2: /* w */
-        reader.read_uint64();
+        reader.read_uint32();
         break;
       case 'u' + 3: /* x */
         reader.read_uint64();
@@ -352,6 +369,16 @@ int main() {
       /* dump */
       case 'D':
         vm.dump();
+        break;
+
+      /* duplicate top value */
+      case '!':
+        vm.stack.dup();
+        break;
+
+      /* get stack size */
+      case '?':
+        vm.size();
         break;
 
       /* no-op */
