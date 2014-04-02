@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <limits>
 #include <cstdint>
 #include <cstring>
 
@@ -112,7 +113,9 @@ class FFIStack {
 
 class Machine {
  public:
-  Machine(std::ostream &out) : out_{out} {};
+  Machine(std::ostream &out) : out_{out} {
+    out.precision(std::numeric_limits<double>::digits10);
+  };
   ~Machine() {
     for (auto &i : cifs_) {
       delete i->arg_types;
