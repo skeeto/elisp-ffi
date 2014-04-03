@@ -22,7 +22,7 @@ previous calls are allowed as arguments.
 (ffi-call "libm.so" "cos" [:double :double] 1.2)
 ;; => 0.362357754476674
 
-;; call getenv
+;; getenv("DISPLAY")
 (ffi-get-string (ffi-call nil "getenv" [:pointer :pointer] "DISPLAY"))
 ;; => ":0"
 ~~~
