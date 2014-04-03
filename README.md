@@ -1,9 +1,15 @@
-# Emacs Lisp Foreign Function Interface (FFI)
+# Emacs Lisp Foreign Function Interface
 
 This library provides an FFI for Emacs Lisp so that Emacs programs can
-invoke functions in native libraries. It works by driving a subprocess.
+invoke functions in native libraries. It works by driving a subprocess
+to do the heavy lifting, passing result values on to Emacs.
 
 ## Examples
+
+A function signature is described by a vector of type keywords. The
+first element is the return value and the rest are the types of the
+arguments. Integers, floats, strings, and pointer values obtained from
+previous calls are allowed as arguments.
 
 ~~~el
 ;; call srand() and rand()
@@ -42,7 +48,8 @@ functions can call back to Emacs.
 Emacs will not be able to handle very large integer values, because
 Emacs' primitive integers are always slightly smaller than the
 system's word size (tagged ints). This is especially an issue with
-32-bit Emacs.
+32-bit Emacs. Pointers are stored as symbols, evading these integer
+limitation.
 
 ## Internals
 
