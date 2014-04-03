@@ -17,13 +17,13 @@
 (ert-deftest ffi-cif ()
   (ffi-test-harness
     (ffi-ensure)
-    (eq (ffi-cif ffi-context '(:uint32 :double :uint8))
-        (ffi-cif ffi-context '(:uint32 :double :uint8)))))
+    (eq (ffi-cif ffi-context [:uint32 :double :uint8])
+        (ffi-cif ffi-context [:uint32 :double :uint8]))))
 
 (ert-deftest ffi-cos ()
   (ffi-test-harness
     (let* ((v 1.2)
-           (result (ffi-call nil "cos" '(:double :double) v)))
+           (result (ffi-call nil "cos" [:double :double] v)))
       (should (< (abs (- (cos v) result)) 0.000001)))))
 
 (provide 'ffi-tests)

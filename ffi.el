@@ -93,15 +93,14 @@
 
 (defun ffi-cif (ffi signature)
   "Create/fetch a call interface handle in FFI for SIGNATURE.
-The signature must be a list of type designators (:unit8,
-:double, etc.). The required first element is the return type and
-the rest are the argument types."
+See `ffi-call' docstring for the signature specification."
   (or (gethash signature (ffi-cifs ffi))
       (with-temp-buffer
         (let ((standard-output (current-buffer)))
-          (dolist (arg (reverse signature))
-            (princ (get arg 'ffi-code))
-            (unless (eq arg :void) (princ "0")))
+          (cl-loop for i from (1- (length signature)) downto 0
+                   for arg = (aref signature i)
+                   do (princ (get arg 'ffi-code))
+                   do (unless (eq arg :void) (princ "0")))
           (princ "w")
           (princ (1- (length signature)))
           (princ "Co")
@@ -123,13 +122,17 @@ the rest are the argument types."
         (setf (gethash name (ffi-syms ffi)) (ffi-read ffi)))))
 
 (defun ffi-call (library symbol signature &rest args)
-  "Call SYMBOL from LIBRARY with ARGS using SIGNATURE."
+  "Call SYMBOL from LIBRARY with ARGS using SIGNATURE.
+The signature must be a vector of type designators (:unit8,
+:double, etc.). The required first element is the return type and
+the rest are the argument types."
   (ffi-ensure)
   (let* ((cif (ffi-cif ffi-context signature))
          (ptr-library (if library (ffi-dlopen ffi-context library) nil))
          (ptr-symbol  (ffi-dlsym ffi-context ptr-library symbol)))
     (cl-loop for arg in (reverse args)
-             for type in (reverse (cdr signature))
+             for i from (1- (length signature)) downto 1
+             for type = (aref signature i)
              do (ffi-push ffi-context type arg))
     (ffi-push ffi-context :pointer cif)
     (ffi-push ffi-context :pointer ptr-symbol)
