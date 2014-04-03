@@ -114,7 +114,7 @@
 
 (defun ffi-push (ffi type value)
   "Push VALUE onto FFI's stack."
-  (cond ((null value) (ffi-write ffi "p0"))
+  (cond ((null value) (ffi-write ffi "p0 "))
         ((eq type :void) (ffi-write ffi "V"))
         ((stringp value) (ffi-write ffi (format "w%dM%s" (length value) value)))
         ((ffi-write ffi (get type 'ffi-code) (prin1-to-string value) " "))))
@@ -138,7 +138,8 @@ See `ffi-call' docstring for the signature specification."
           (cl-loop for i from (1- (length signature)) downto 0
                    for arg = (aref signature i)
                    do (princ (get arg 'ffi-code))
-                   do (unless (eq arg :void) (princ "0")))
+                   do (unless (eq arg :void) (princ "0"))
+                   do (princ " "))
           (princ "w")
           (princ (1- (length signature)))
           (princ "C")
