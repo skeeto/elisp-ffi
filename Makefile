@@ -1,8 +1,8 @@
-CXXFLAGS = -std=c++11 -Wall -O2
-LDLIBS = -ldl -lffi -lstdc++
+CXXFLAGS += -std=c++11 -Wall -O2
+LDLIBS   += -ldl -lffi -lstdc++
 
-CXX    = clang++
-FORMAT = clang-format-3.5
+CXX    ?= g++
+FORMAT ?= clang-format-3.5
 
 ffi-glue : ffi-glue.cc
 

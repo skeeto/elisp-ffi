@@ -118,7 +118,7 @@ class FFIStack {
 
 class Machine {
  public:
-  Machine(std::ostream &out) : out_{out} {
+  Machine(std::ostream &out) : out_(out) {
     out.precision(std::numeric_limits<double>::digits10);
   };
   ~Machine() {
@@ -207,7 +207,7 @@ class Machine {
 
 class Reader {
  public:
-  Reader(Machine &vm, std::istream &in) : vm_{vm}, in_{in} {};
+  Reader(Machine &vm, std::istream &in) : vm_(vm), in_(in) {};
 
   void read_uint8() {
     uint8_t i;
