@@ -30,7 +30,7 @@
 
 (cl-defstruct (ffi (:constructor ffi--create))
   (process nil)
-  (log nil)
+  (input (generate-new-buffer " *ffi-input*"))
   (cifs (make-hash-table :test 'equal))
   (libs (make-hash-table :test 'equal))
   (syms (make-hash-table :test 'equal)))
@@ -40,31 +40,43 @@
   (let* ((process-connection-type nil)  ; use a pipe
          (buffer (generate-new-buffer (format "*%s*" name)))
          (exec (expand-file-name "ffi-glue" ffi-data-root))
-         (process (start-process name buffer exec)))
-    (setf (process-sentinel process)
-          (lambda (proc _) (kill-buffer (process-buffer proc))))
-    (ffi--create :process process :log (generate-new-buffer "*out*"))))
+         (process (start-process name buffer exec))
+         (ffi (ffi--create :process process)))
+    (prog1 ffi
+      (setf (process-sentinel process)
+            (lambda (_proc _status)
+              (kill-buffer buffer)
+              (kill-buffer (ffi-input ffi)))))))
 
 (defun ffi-destroy (ffi)
   "Destroy an FFI context."
   (unless (null ffi)
-    (kill-process (ffi-process ffi))))
+    (let ((process (ffi-process ffi)))
+      (unwind-protect
+          (when (process-live-p process)
+            (ffi-flush ffi))
+        (kill-process process)))))
 
 (defun ffi-ensure ()
   "Ensure that `ffi-context' is initialized."
   (when (or (null ffi-context) (not (process-live-p (ffi-process ffi-context))))
     (setf ffi-context (ffi-create))))
 
-(defun ffi-write (ffi program)
-  "Write stack PROGRAM to FFI."
-  (let ((log (ffi-log ffi)))
-    (when log
-      (with-current-buffer log
-        (insert program))))
-  (process-send-string (ffi-process ffi) program))
+(defun ffi-write (ffi &rest strings)
+  "Write STRINGS to FFI."
+  (with-current-buffer (ffi-input ffi)
+    (apply #'insert strings)))
+
+(defun ffi-flush (ffi)
+  "Send all prepared FFI input to the subprocess."
+  (with-current-buffer (ffi-input ffi)
+    (unless (zerop (buffer-size))
+      (process-send-region (ffi-process ffi) (point-min) (point-max))
+      (erase-buffer))))
 
 (defun ffi-read (ffi)
-  "Read a value from FFI."
+  "Blocking read a value from FFI."
+  (ffi-flush ffi)
   (let ((process (ffi-process ffi)))
     (with-current-buffer (process-buffer process)
       (while (not (eql ?$ (char-after (1- (point-max)))))
@@ -77,9 +89,8 @@
   "Push VALUE onto FFI's stack."
   (cond ((null value) (ffi-write ffi "p0"))
         ((eq type :void) (ffi-write ffi "V"))
-        ((stringp value) (ffi-write ffi "w%dM%s" (length value) value))
-        ((ffi-write ffi (concat (get type 'ffi-code)
-                                (prin1-to-string value) " ")))))
+        ((stringp value) (ffi-write ffi (format "w%dM%s" (length value) value)))
+        ((ffi-write ffi (get type 'ffi-code) (prin1-to-string value) " "))))
 
 (defun ffi-pop (ffi)
   "Return value from the top of FFI's stack."
@@ -103,23 +114,26 @@ See `ffi-call' docstring for the signature specification."
                    do (unless (eq arg :void) (princ "0")))
           (princ "w")
           (princ (1- (length signature)))
-          (princ "Co")
+          (princ "C")
           (ffi-write ffi (buffer-string))
-          (setf (gethash signature (ffi-cifs ffi)) (ffi-read ffi))))))
+          (setf (gethash signature (ffi-cifs ffi)) (ffi-pop ffi))))))
 
 (defun ffi-dlopen (ffi name)
   "Fetch a handle (pointer) by library NAME."
   (or (gethash name (ffi-libs ffi))
       (progn
-        (ffi-write ffi (format "w%dM%sOo" (length name) name))
-        (setf (gethash name (ffi-libs ffi)) (ffi-read ffi)))))
+        (ffi-push ffi :pointer name)
+        (ffi-write ffi "O")
+        (setf (gethash name (ffi-libs ffi)) (ffi-pop ffi)))))
 
 (defun ffi-dlsym (ffi library name)
   "Fetch a handle for NAME from LIRBARY in FFI."
   (or (gethash name (ffi-syms ffi))
       (progn
-        (ffi-write ffi (format "p%sw%dM%sSo" (or library 0) (length name) name))
-        (setf (gethash name (ffi-syms ffi)) (ffi-read ffi)))))
+        (ffi-push ffi :pointer (or library 0))
+        (ffi-push ffi :pointer name)
+        (ffi-write ffi "S")
+        (setf (gethash name (ffi-syms ffi)) (ffi-pop ffi)))))
 
 (defun ffi-call (library symbol signature &rest args)
   "Call SYMBOL from LIBRARY with ARGS using SIGNATURE.
