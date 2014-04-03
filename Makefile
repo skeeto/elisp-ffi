@@ -1,12 +1,10 @@
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall -O2
 LDLIBS = -ldl -lffi -lstdc++
 
-CXX = clang++
+CXX    = clang++
 FORMAT = clang-format-3.5
 
-ffi-glue : ffi-glue.o
-
-ffi-glue.o : ffi-glue.cc
+ffi-glue : ffi-glue.cc
 
 .PHONY : format clean test
 

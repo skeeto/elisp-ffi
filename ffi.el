@@ -1,5 +1,20 @@
 ;;; ffi.el --- foreign function interface -*- lexical-binding: t; -*-
 
+;; This is free and unencumbered software released into the public domain.
+
+;;; Commentary:
+
+;; The main function to be concerned about is `ffi-call'. It takes a
+;; library name, a symbol name, a function signature (a vector of
+;; types from `ffi-types'), and a list of arguments.
+
+;;     (ffi-call nil "cos" [:double :double] 1.2)
+;;     (ffi-call nil "rand" [:sint32])
+
+;; If you get the function signature wrong, the FFI context may crash.
+
+;;; Code:
+
 (require 'cl-lib)
 
 (defvar ffi-types
