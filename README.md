@@ -12,13 +12,13 @@ arguments. Integers, floats, strings, and pointer values obtained from
 previous calls are allowed as arguments.
 
 ~~~el
-;; call srand() and rand()
+;; srand(0) and rand()
 (ffi-call nil "srand" [:void :uint32] 0)
 ;; => :void
 (ffi-call nil "rand" [:sint32])
 ;; => 1102520059
 
-;; call cos()
+;; cos(1.2)
 (ffi-call "libm.so" "cos" [:double :double] 1.2)
 ;; => 0.362357754476674
 ~~~
