@@ -21,6 +21,10 @@ previous calls are allowed as arguments.
 ;; cos(1.2)
 (ffi-call "libm.so" "cos" [:double :double] 1.2)
 ;; => 0.362357754476674
+
+;; call getenv
+(ffi-get-string (ffi-call nil "getenv" [:pointer :pointer] "DISPLAY"))
+;; => ":0"
 ~~~
 
 The function signatures (CIFs) and handles are cached so that they

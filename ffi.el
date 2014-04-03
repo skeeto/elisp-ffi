@@ -58,6 +58,8 @@
          (process (start-process name buffer exec))
          (ffi (ffi--create :process process)))
     (prog1 ffi
+      (with-current-buffer buffer (set-buffer-multibyte nil))
+      (with-current-buffer (ffi-input ffi) (set-buffer-multibyte nil))
       (setf (process-sentinel process)
             (lambda (_proc _status)
               (kill-buffer buffer)
@@ -98,6 +100,16 @@
         (accept-process-output))
       (setf (point) (point-min))
       (prog1 (read (current-buffer))
+        (erase-buffer)))))
+
+(defun ffi-read-bytes (ffi length)
+  "Read LENGTH bytes from FFI."
+  (ffi-flush ffi)
+  (let ((process (ffi-process ffi)))
+    (with-current-buffer (process-buffer process)
+      (while (< (buffer-size) length)
+        (accept-process-output))
+      (prog1 (buffer-string)
         (erase-buffer)))))
 
 (defun ffi-push (ffi type value)
@@ -150,6 +162,8 @@ See `ffi-call' docstring for the signature specification."
         (ffi-write ffi "S")
         (setf (gethash name (ffi-syms ffi)) (ffi-pop ffi)))))
 
+;; Primary API:
+
 (defun ffi-call (library symbol signature &rest args)
   "Call SYMBOL from LIBRARY with ARGS using SIGNATURE.
 The signature must be a vector of type designators (:unit8,
@@ -167,6 +181,15 @@ the rest are the argument types."
     (ffi-push ffi-context :pointer ptr-symbol)
     (ffi-write ffi-context "c")
     (ffi-pop ffi-context)))
+
+(defun ffi-get-string (ptr)
+  "Get the string behind PTR."
+  (ffi-ensure)
+  (ffi-push ffi-context :pointer ptr)
+  (ffi-write ffi-context "L")
+  (let ((length (ffi-pop ffi-context)))
+    (ffi-write ffi-context "LD")
+    (ffi-read-bytes ffi-context length)))
 
 (provide 'ffi)
 
