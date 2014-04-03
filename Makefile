@@ -21,3 +21,4 @@ test : ffi-glue
 	echo -n 'k0w0Cp0w4MrandSco' | ./$<
 	 ## cos(1.2)
 	echo -n 'd1.2d0d0w1Cp0w3McosSco' | ./$<
+	emacs -batch -Q -L . -l ffi-tests.el -f ert-run-tests-batch
