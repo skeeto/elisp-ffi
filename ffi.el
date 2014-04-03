@@ -39,7 +39,7 @@
   "Create and return a new FFI context."
   (let* ((process-connection-type nil)  ; use a pipe
          (buffer (generate-new-buffer (format "*%s*" name)))
-         (exec (expand-file-name "glue/ffi-glue" ffi-data-root))
+         (exec (expand-file-name "ffi-glue" ffi-data-root))
          (process (start-process name buffer exec)))
     (setf (process-sentinel process)
           (lambda (proc _) (kill-buffer (process-buffer proc))))
@@ -47,7 +47,8 @@
 
 (defun ffi-destroy (ffi)
   "Destroy an FFI context."
-  (kill-process (ffi-process ffi)))
+  (unless (null ffi)
+    (kill-process (ffi-process ffi))))
 
 (defun ffi-ensure ()
   "Ensure that `ffi-context' is initialized."
@@ -122,6 +123,7 @@ the rest are the argument types."
         (setf (gethash name (ffi-syms ffi)) (ffi-read ffi)))))
 
 (defun ffi-call (library symbol signature &rest args)
+  "Call SYMBOL from LIBRARY with ARGS using SIGNATURE."
   (ffi-ensure)
   (let* ((cif (ffi-cif ffi-context signature))
          (ptr-library (if library (ffi-dlopen ffi-context library) nil))
@@ -133,25 +135,6 @@ the rest are the argument types."
     (ffi-push ffi-context :pointer ptr-symbol)
     (ffi-write ffi-context "c")
     (ffi-pop ffi-context)))
-
-;; test area
-
-(let ((ffi (ffi-create)))
-  (prog1
-      (list (ffi-cif ffi '(:uint32 :double :uint8))
-            (ffi-cif ffi '(:uint32 :double :uint8))
-            (ffi-dlopen ffi "libm.so")
-            (ffi-dlsym ffi nil "cos"))
-    (ffi-destroy ffi)))
-
-(let ((ffi (ffi-create)))
-  (ffi-write ffi "d1.2d0d0w1Cp0w3McosSco")
-  (prog1 (ffi-read ffi)
-    (ffi-destroy ffi)))
-
-(ffi-call nil "cos" '(:double :double) 1.2)
-(ffi-call nil "srand" '(:void :uint32) 0)
-(cl-loop repeat 10 collect (ffi-call nil "rand" '(:sint32)))
 
 (provide 'ffi)
 
