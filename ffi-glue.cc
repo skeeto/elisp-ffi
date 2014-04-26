@@ -269,7 +269,8 @@ class Reader {
   }
 
   void read(uint32_t size) {
-    char *buffer = new char[size];
+    char *buffer = new char[size + 1];
+    buffer[size] = '\0';
     in_.read(buffer, size);
     vm_.stack.push(buffer);
   }
