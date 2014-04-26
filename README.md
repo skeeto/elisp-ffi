@@ -4,6 +4,8 @@ This library provides an FFI for Emacs Lisp so that Emacs programs can
 invoke functions in native libraries. It works by driving a subprocess
 to do the heavy lifting, passing result values on to Emacs.
 
+* Read [how it works](http://nullprogram.com/blog/2014/04/26/).
+
 ## Examples
 
 A function signature is described by a vector of type keywords. The
