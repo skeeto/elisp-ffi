@@ -46,7 +46,7 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
   } else if (v.type == &ffi_type_double) {
     out << v.value.d;
   } else if (v.type == &ffi_type_pointer) {
-    out << v.value.ptr;
+    out << "\\" << v.value.ptr;
   } else if (v.type == &ffi_type_void) {
     out << ":void";
   }
