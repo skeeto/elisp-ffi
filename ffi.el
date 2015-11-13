@@ -2,6 +2,11 @@
 
 ;; This is free and unencumbered software released into the public domain.
 
+;; Author: Christopher Wellons <wellons@nullprogram.com>
+;; URL: https://github.com/skeeto/elisp-ffi
+;; Version: 1.0.0
+;; Package-Requires: ((emacs "24.3") (cl-lib "0.3"))
+
 ;;; Commentary:
 
 ;; The main function to be concerned about is `ffi-call'. It takes a
