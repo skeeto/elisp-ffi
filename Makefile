@@ -1,5 +1,6 @@
-CXXFLAGS += -std=c++11 -Wall -O2
-LDLIBS   += -ldl -lffi -lstdc++
+CXXFLAGS += -std=c++11 -Wall -O2 $(shell pkg-config --cflags libffi)
+LDFLAGS  += $(shell pkg-config --libs libffi)
+LDLIBS   += -ldl -lstdc++
 
 CXX    ?= g++
 FORMAT ?= clang-format-3.5
