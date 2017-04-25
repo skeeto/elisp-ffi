@@ -1,23 +1,16 @@
-CXXFLAGS += -std=c++11 -Wall -O2 $(shell pkg-config --cflags libffi)
-LDFLAGS  += $(shell pkg-config --libs libffi)
-LDLIBS   += -ldl -lstdc++
+.POSIX:
+CXX      = g++
+CXXFLAGS = -std=c++11 -Wall -Wextra -O3 $$(pkg-config --cflags libffi)
+LDLIBS   = -ldl -lstdc++ $$(pkg-config --libs libffi)
 
-CXX    ?= g++
-FORMAT ?= clang-format-3.5
+ffi-glue: ffi-glue.cc
 
-ffi-glue : ffi-glue.cc
+clean:
+	rm -f *.o ffi-glue
 
-.PHONY : format clean test
-
-format :
-	$(FORMAT) -style=google -i *.cc
-
-clean :
-	$(RM) *.o ffi-glue
-
-test : ffi-glue
-	 ## rand()
-	echo -n 'k0w0Cp0w4MrandSco' | ./$<
-	 ## cos(1.2)
-	echo -n 'd1.2d0d0w1Cp0w3McosSco' | ./$<
+test: ffi-glue
+	## rand()
+	echo -n 'k0w0Cp0w4MrandSco' | ./ffi-glue
+	## cos(1.2)
+	echo -n 'd1.2d0d0w1Cp0w3McosSco' | ./ffi-glue
 	emacs -batch -Q -L . -l ffi-tests.el -f ert-run-tests-batch
