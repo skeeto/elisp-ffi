@@ -34,6 +34,11 @@
 	  (should (isnan value))
 	  (should (= errno 33))))) ; TODO Have some way to get macros...
 
+(ert-deftest ffi-infinity ()
+  (ffi-test-harness
+	(let ((result (ffi-call nil "log" [:double :double] 0)))
+	  (should (= -1.0e+INF result)))))
+
 (provide 'ffi-tests)
 
 ;;; ffi-tests.el ends here
