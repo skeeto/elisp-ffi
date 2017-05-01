@@ -188,6 +188,26 @@ the rest are the argument types."
     (ffi-write ffi-context "c")
     (ffi-pop ffi-context)))
 
+(defun ffi-call-errno (library symbol signature &rest args)
+  "Call SYMBOL from LIBRARY with ARGS using SIGNATURE.
+The signature must be a vector of type designators (:unit8,
+:double, etc.). The required first element is the return type and
+the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
+  (ffi-ensure)
+  (let* ((cif (ffi-cif ffi-context signature))
+         (ptr-library (if library (ffi-dlopen ffi-context library) nil))
+         (ptr-symbol  (ffi-dlsym ffi-context ptr-library symbol)))
+    (cl-loop for arg in (reverse args)
+             for i from (1- (length signature)) downto 1
+             for type = (aref signature i)
+             do (ffi-push ffi-context type arg))
+    (ffi-push ffi-context :pointer cif)
+    (ffi-push ffi-context :pointer ptr-symbol)
+    (ffi-write ffi-context "E")
+    (cons
+      (ffi-pop ffi-context)
+      (ffi-pop ffi-context))))
+
 (defun ffi-get-string (ptr)
   "Get the string behind PTR."
   (ffi-ensure)

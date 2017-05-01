@@ -26,6 +26,14 @@
            (result (ffi-call nil "cos" [:double :double] v)))
       (should (< (abs (- (cos v) result)) 0.000001)))))
 
+(ert-deftest ffi-errno ()
+  (ffi-test-harness
+	(let* ((result (ffi-call-errno nil "sqrt" [:double :double] -1))
+		   (value (car result))
+		   (errno (cdr result)))
+	  (should (isnan value))
+	  (should (= errno 33))))) ; TODO Have some way to get macros...
+
 (provide 'ffi-tests)
 
 ;;; ffi-tests.el ends here
