@@ -1,8 +1,9 @@
-#include <iostream>
-#include <vector>
-#include <limits>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
+#include <limits>
+#include <vector>
 
 #include <ffi.h>
 #include <dlfcn.h>
@@ -42,7 +43,18 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
   } else if (v.type == &ffi_type_sint64) {
     out << v.value.s64;
   } else if (v.type == &ffi_type_float) {
-    out << v.value.f;
+	float value = v.value.f;
+	if(std::isnan(value)) {
+		out << "0.0e+NaN";
+	} else if(std::isinf(value)) {
+		if(value < 0) {
+			out << "-1.0e+INF";
+		} else {
+			out << "1.0e+INF";
+		}
+	} else {
+	    out << value;
+	}
   } else if (v.type == &ffi_type_double) {
     out << v.value.d;
   } else if (v.type == &ffi_type_pointer) {
