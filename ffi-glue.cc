@@ -164,7 +164,7 @@ class Machine {
     cifs_.push_back(cif);
   }
 
-  void call() {
+  void call(bool push_errno) {
     void (*function)() = reinterpret_cast<void (*)()>(stack.pop().value.ptr);
     ffi_cif *cif = static_cast<ffi_cif *>(stack.pop().value.ptr);
     int nargs = cif->nargs;
@@ -177,6 +177,8 @@ class Machine {
     for (int i = 0; i < nargs; i++) {
       stack.pop();
     }
+	if(push_errno)
+    	stack.push(errno);
     stack.push(result);
   }
 
@@ -345,7 +347,12 @@ int main() {
 
       /* call */
       case 'c':
-        vm.call();
+        vm.call(false);
+        break;
+
+      /* call with errno */
+      case 'E':
+        vm.call(true);
         break;
 
       /* call */
