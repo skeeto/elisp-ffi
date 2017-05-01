@@ -56,7 +56,18 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
 	    out << value;
 	}
   } else if (v.type == &ffi_type_double) {
-    out << v.value.d;
+	double value = v.value.d;
+	if(std::isnan(value)) {
+		out << "0.0e+NaN";
+	} else if(std::isinf(value)) {
+		if(value < 0) {
+			out << "-1.0e+INF";
+		} else {
+			out << "1.0e+INF";
+		}
+	} else {
+	    out << value;
+	}
   } else if (v.type == &ffi_type_pointer) {
     out << "\\" << v.value.ptr;
   } else if (v.type == &ffi_type_void) {
