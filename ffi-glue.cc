@@ -187,7 +187,7 @@ class Machine {
     cifs_.push_back(cif);
   }
 
-  void call(bool push_errno) {
+  void call(bool get_errno) {
     void (*function)() = reinterpret_cast<void (*)()>(stack.pop().value.ptr);
     ffi_cif *cif = static_cast<ffi_cif *>(stack.pop().value.ptr);
     int nargs = cif->nargs;
@@ -196,11 +196,13 @@ class Machine {
     for (int i = 0; i < nargs; i++) {
       args[i] = &stack[i].value;
     }
+	if(get_errno)
+    	errno = 0;
     ffi_call(cif, function, &result.value, args);
     for (int i = 0; i < nargs; i++) {
       stack.pop();
     }
-	if(push_errno)
+	if(get_errno)
     	stack.push(errno);
     stack.push(result);
   }
