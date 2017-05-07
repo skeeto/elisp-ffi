@@ -219,6 +219,65 @@ public:
         out_.write(data, size);
     }
 
+    void read_mem() {
+        int type = std::cin.get();
+        Value out;
+        uint8_t* ptr_bytes = (uint8_t*) stack.pop().value.ptr;
+        size_t offset = stack.pop().value.u64;
+        ptr_bytes -= offset;
+        void* ptr = ptr_bytes;
+        switch(type) {
+        case 'u':
+            out.type = &ffi_type_uint8;
+            out.value.u8 = *static_cast<uint8_t*>(ptr);
+            break;
+        case 'v':
+            out.type = &ffi_type_uint16;
+            out.value.u16 = *static_cast<uint16_t*>(ptr);
+            break;
+        case 'w':
+            out.type = &ffi_type_uint32;
+            out.value.u32 = *static_cast<uint32_t*>(ptr);
+            break;
+        case 'x':
+            out.type = &ffi_type_uint64;
+            out.value.u64 = *static_cast<uint64_t*>(ptr);
+            break;
+        case 'i':
+            out.type = &ffi_type_sint8;
+            out.value.s8 = *static_cast<int8_t*>(ptr);
+            break;
+        case 'j':
+            out.type = &ffi_type_sint16;
+            out.value.s16 = *static_cast<int16_t*>(ptr);
+            break;
+        case 'k':
+            out.type = &ffi_type_sint32;
+            out.value.s32 = *static_cast<int32_t*>(ptr);
+            break;
+        case 'l':
+            out.type = &ffi_type_sint64;
+            out.value.s64 = *static_cast<int64_t*>(ptr);
+            break;
+        case 'f':
+            out.type = &ffi_type_float;
+            out.value.f = *static_cast<float*>(ptr);
+            break;
+        case 'd':
+            out.type = &ffi_type_double;
+            out.value.d = *static_cast<double*>(ptr);
+            break;
+        case 'p':
+            out.type = &ffi_type_pointer;
+            out.value.ptr = *static_cast<void**>(ptr);
+            break;
+        default:
+            std::cerr << "invalid type in read_mem: " << static_cast<char>(type) << std::endl;
+            return;
+        }
+        stack.push(out);
+    }
+
     void free() { delete static_cast<char *>(stack.pop().value.ptr); }
 
     void size() {
@@ -411,6 +470,11 @@ int main() {
         /* dump */
         case 'D':
             vm.dump();
+            break;
+
+        /* read from memory */
+        case 'r':
+            vm.read_mem();
             break;
 
         /* duplicate top value */
