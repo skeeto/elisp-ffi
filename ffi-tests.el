@@ -28,29 +28,31 @@
 
 (ert-deftest ffi-errno ()
   (ffi-test-harness
-	(let* ((result (ffi-call-errno nil "sqrt" [:double :double] -1))
-		   (value (car result))
-		   (errno (cdr result)))
-	  (should (isnan value))
-	  (should (= errno 33))))) ; TODO Have some way to get macros...
+    (let* ((result (ffi-call-errno nil "sqrt" [:double :double] -1))
+           (value (car result))
+           (errno (cdr result)))
+      (should (isnan value))
+      (should (= errno 33))))) ; TODO Have some way to get macros...
 
 (ert-deftest ffi-infinity ()
   (ffi-test-harness
-	(let ((result (ffi-call nil "log" [:double :double] 0)))
-	  (should (= -1.0e+INF result)))))
+    (let ((result (ffi-call nil "log" [:double :double] 0)))
+      (should (= -1.0e+INF result)))))
 
 (ert-deftest ffi-deref ()
   (ffi-test-harness
-	(let ((ptr (ffi-call nil "malloc" [:pointer :uint64] 4)))
-	  (ffi-call nil "snprintf" [:sint32 :pointer :uint64 :pointer :sint32] ptr 4 "%d" 123)
-	  (let ((one   (ffi-deref ptr :uint8 0))
-		    (two   (ffi-deref ptr :uint8 1))
-		    (three (ffi-deref ptr :uint8 2))
-		    (null  (ffi-deref ptr :uint8 3)))
-	    (should (= one   49))
-	    (should (= two   50))
-	    (should (= three 51))
-	    (should (= null   0))))))
+    (let* ((ptr (ffi-call nil "malloc" [:pointer :uint64] 4))
+             (len (ffi-call nil "snprintf" [:sint32 :pointer :uint64 :pointer :sint32] ptr 4 "%d" 123)))
+      (should (= 4 len))
+      (let ((one   (ffi-deref ptr :uint8 0))
+            (two   (ffi-deref ptr :uint8 1))
+            (three (ffi-deref ptr :uint8 2))
+            (null  (ffi-deref ptr :uint8 3)))
+        (should (= one   49))
+        (should (= two   50))
+        (should (= three 51))
+        (should (= null   0))
+        (ffi-call nil "free" [:void :pointer] ptr)))))
 
 (provide 'ffi-tests)
 
