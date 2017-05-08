@@ -42,8 +42,9 @@
 (ert-deftest ffi-deref ()
   (ffi-test-harness
     (let* ((ptr (ffi-call nil "malloc" [:pointer :uint64] 4))
-             (len (ffi-call nil "snprintf" [:sint32 :pointer :uint64 :pointer :sint32] ptr 4 "%d" 123)))
-      (should (= 4 len))
+           (len (ffi-call nil "snprintf" [:sint32 :pointer :uint64 :pointer :sint32] ptr 4 "%d" 123)))
+      (should (= 3 len))
+	  (should (equal (ffi-get-string ptr) "123"))
       (let ((one   (ffi-deref ptr :uint8 0))
             (two   (ffi-deref ptr :uint8 1))
             (three (ffi-deref ptr :uint8 2))

@@ -27,7 +27,7 @@ struct Value {
 
 std::ostream &operator<<(std::ostream &out, const Value &v) {
     if (v.type == &ffi_type_uint8) {
-        out << v.value.u8;
+        out << static_cast<unsigned int>(v.value.u8);
     } else if (v.type == &ffi_type_uint16) {
         out << v.value.u16;
     } else if (v.type == &ffi_type_uint32) {
@@ -37,7 +37,7 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
     } else if (v.type == &ffi_type_sint8) {
         out << v.value.s8;
     } else if (v.type == &ffi_type_sint16) {
-        out << v.value.s16;
+        out << static_cast<int>(v.value.u8);
     } else if (v.type == &ffi_type_sint32) {
         out << v.value.s32;
     } else if (v.type == &ffi_type_sint64) {
@@ -222,10 +222,9 @@ public:
     void read_mem() {
         int type = std::cin.get();
         Value out;
-        uint8_t* ptr_bytes = (uint8_t*) stack.pop().value.ptr;
+        uint8_t* ptr_bytes = static_cast<uint8_t*>(stack.pop().value.ptr);
         size_t offset = stack.pop().value.u64;
-        ptr_bytes -= offset;
-        void* ptr = ptr_bytes;
+        void* ptr = ptr_bytes + offset;
         switch(type) {
         case 'u':
             out.type = &ffi_type_uint8;
@@ -296,9 +295,9 @@ public:
     Reader(Machine &vm, std::istream &in) : vm_(vm), in_(in) {};
 
     void read_uint8() {
-        uint8_t i;
+        uint32_t i;
         in_ >> i;
-        vm_.stack.push(i);
+        vm_.stack.push(static_cast<uint8_t>(i));
     }
     void read_uint16() {
         uint16_t i;
@@ -317,9 +316,9 @@ public:
     }
 
     void read_sint8() {
-        int8_t i;
+        int32_t i;
         in_ >> i;
-        vm_.stack.push(i);
+        vm_.stack.push(static_cast<int8_t>(i));
     }
     void read_sint16() {
         int16_t i;
