@@ -35,9 +35,9 @@ std::ostream &operator<<(std::ostream &out, const Value &v) {
     } else if (v.type == &ffi_type_uint64) {
         out << v.value.u64;
     } else if (v.type == &ffi_type_sint8) {
-        out << v.value.s8;
+        out << static_cast<int>(v.value.s8);
     } else if (v.type == &ffi_type_sint16) {
-        out << static_cast<int>(v.value.u8);
+        out << v.value.s16;
     } else if (v.type == &ffi_type_sint32) {
         out << v.value.s32;
     } else if (v.type == &ffi_type_sint64) {
