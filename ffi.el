@@ -217,7 +217,7 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
     (ffi-write ffi-context "LD")
     (ffi-read-bytes ffi-context length)))
 
-(defun ffi-deref (pointer type offset)
+(defun ffi-deref (ptr type offset)
   "Reads a value from memory at the given offset from the pointer."
   (ffi-ensure)
   (ffi-push ffi-context :uint64 offset)
