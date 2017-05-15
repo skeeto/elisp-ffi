@@ -52,8 +52,10 @@
         (should (= one   49))
         (should (= two   50))
         (should (= three 51))
-        (should (= null   0))
-        (ffi-call nil "free" [:void :pointer] ptr)))))
+        (should (= null   0)))
+	  (let ((vals (ffi-read-array ptr :uint8 4)))
+		(should (equal vals '(49 50 51 0))))
+      (ffi-call nil "free" [:void :pointer] ptr))))
 
 (provide 'ffi-tests)
 

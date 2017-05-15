@@ -225,6 +225,31 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
   (ffi-write ffi-context "r" (get type 'ffi-code))
   (ffi-pop ffi-context))
 
+(defun ffi-read-array (pointer type length)
+  "Reads an array of values."
+  (let ((l nil)
+		(x (- length 1)))
+	(while (>= x 0)
+	  (setq l (cons (ffi-deref pointer type x) l))
+	  (setq x (- x (ffi-sizeof type))))
+	l))
+
+(defun ffi-sizeof (type)
+  "Returns the size in bytes of the given type."
+  (cond
+	((eq type :uint8)   1)
+	((eq type :uint16)  2)
+	((eq type :uint32)  4)
+	((eq type :uint64)  8)
+	((eq type :sint8)   1)
+	((eq type :sint16)  2)
+	((eq type :sint32)  4)
+	((eq type :sint64)  8)
+	((eq type :float)   4)
+	((eq type :double)  8)
+	((eq type :pointer) 8) ; TODO Make this correct on non-64-bit systems.
+	((eq type :void)    0)))
+
 (provide 'ffi)
 
 ;;; ffi.el ends here
