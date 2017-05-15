@@ -228,27 +228,54 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
 (defun ffi-read-array (pointer type length)
   "Reads an array of values."
   (let ((l nil)
-		(x (- length 1)))
-	(while (>= x 0)
-	  (setq l (cons (ffi-deref pointer type x) l))
-	  (setq x (- x (ffi-sizeof type))))
-	l))
+        (x (- length 1)))
+    (while (>= x 0)
+      (setq l (cons (ffi-deref pointer type x) l))
+      (setq x (- x (ffi-sizeof type))))
+    l))
+
+(defun ffi-read-struct (pointer struct)
+  "Reads a struct from a pointer. A struct is specified as a list of types and
+  padding lengths.
+  
+  For example, a struct
+  
+  struct foo {
+      uint16_t bar;
+    uint8_t baz;
+  };
+  
+  would be written
+  
+  '(:uint16 1 :uint8)
+  
+  and a ffi-read-struct call would return something like
+  
+  '(1000 100)"
+  (let ((s nil)
+        (x 0))
+    (dolist (component struct (reverse s))
+	  (if (integerp component)
+		(setq x (+ x component))
+		(progn
+		  (setq s (cons (ffi-deref pointer component x) s))
+		  (setq x (+ x (ffi-sizeof component))))))))
 
 (defun ffi-sizeof (type)
   "Returns the size in bytes of the given type."
   (cond
-	((eq type :uint8)   1)
-	((eq type :uint16)  2)
-	((eq type :uint32)  4)
-	((eq type :uint64)  8)
-	((eq type :sint8)   1)
-	((eq type :sint16)  2)
-	((eq type :sint32)  4)
-	((eq type :sint64)  8)
-	((eq type :float)   4)
-	((eq type :double)  8)
-	((eq type :pointer) 8) ; TODO Make this correct on non-64-bit systems.
-	((eq type :void)    0)))
+    ((eq type :uint8)   1)
+    ((eq type :uint16)  2)
+    ((eq type :uint32)  4)
+    ((eq type :uint64)  8)
+    ((eq type :sint8)   1)
+    ((eq type :sint16)  2)
+    ((eq type :sint32)  4)
+    ((eq type :sint64)  8)
+    ((eq type :float)   4)
+    ((eq type :double)  8)
+    ((eq type :pointer) 8) ; TODO Make this correct on non-64-bit systems.
+    ((eq type :void)    0)))
 
 (provide 'ffi)
 

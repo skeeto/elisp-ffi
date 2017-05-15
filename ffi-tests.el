@@ -55,6 +55,8 @@
         (should (= null   0)))
 	  (let ((vals (ffi-read-array ptr :uint8 4)))
 		(should (equal vals '(49 50 51 0))))
+	  (let ((vals (ffi-read-struct ptr '(:uint8 1 :uint8 :uint8))))
+		(should (equal vals '(49 51 0))))
       (ffi-call nil "free" [:void :pointer] ptr))))
 
 (provide 'ffi-tests)
