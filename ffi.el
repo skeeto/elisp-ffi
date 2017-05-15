@@ -274,7 +274,7 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
     ((eq type :sint64)  8)
     ((eq type :float)   4)
     ((eq type :double)  8)
-    ((eq type :pointer) 8) ; TODO Make this correct on non-64-bit systems.
+    ((eq type :pointer) (/ (+ 3 (logb most-positive-fixnum)) 8))
     ((eq type :void)    0)))
 
 (provide 'ffi)
