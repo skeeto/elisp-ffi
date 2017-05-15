@@ -255,11 +255,11 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
   (let ((s nil)
         (x 0))
     (dolist (component struct (reverse s))
-	  (if (integerp component)
-		(setq x (+ x component))
-		(progn
-		  (setq s (cons (ffi-deref pointer component x) s))
-		  (setq x (+ x (ffi-sizeof component))))))))
+      (if (integerp component)
+        (setq x (+ x component))
+        (progn
+          (setq s (cons (ffi-deref pointer component x) s))
+          (setq x (+ x (ffi-sizeof component))))))))
 
 (defun ffi-sizeof (type)
   "Returns the size in bytes of the given type."
