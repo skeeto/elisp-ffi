@@ -242,7 +242,7 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
   
   struct foo {
       uint16_t bar;
-    uint8_t baz;
+      uint8_t baz;
   };
   
   would be written
