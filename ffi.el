@@ -65,6 +65,8 @@
     (prog1 ffi
       (with-current-buffer buffer (set-buffer-multibyte nil))
       (with-current-buffer (ffi-input ffi) (set-buffer-multibyte nil))
+      (buffer-disable-undo buffer)
+      (buffer-disable-undo (ffi-input ffi))
       (setf (process-sentinel process)
             (lambda (_proc _status)
               (kill-buffer buffer)
