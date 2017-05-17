@@ -58,15 +58,13 @@
 (cl-defun ffi-create (&optional (name "ffi"))
   "Create and return a new FFI context."
   (let* ((process-connection-type nil)  ; use a pipe
-         (buffer (generate-new-buffer (format "*%s*" name)))
+         (buffer (generate-new-buffer (format " *%s*" name)))
          (exec (expand-file-name "ffi-glue" ffi-data-root))
          (process (start-process name buffer exec))
          (ffi (ffi--create :process process)))
     (prog1 ffi
       (with-current-buffer buffer (set-buffer-multibyte nil))
       (with-current-buffer (ffi-input ffi) (set-buffer-multibyte nil))
-      (buffer-disable-undo buffer)
-      (buffer-disable-undo (ffi-input ffi))
       (setf (process-sentinel process)
             (lambda (_proc _status)
               (kill-buffer buffer)
