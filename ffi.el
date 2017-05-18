@@ -217,22 +217,21 @@ the rest are the argument types. Returns a pair (RETURN-VALUE . ERRNO)."
     (ffi-write ffi-context "LD")
     (ffi-read-bytes ffi-context length)))
 
-(defun ffi-deref (ptr type offset)
+(defun ffi-deref (ptr ty offset)
   "Reads a value from memory at the given offset from the pointer."
   (ffi-ensure)
   (ffi-push ffi-context :uint64 offset)
   (ffi-push ffi-context :pointer ptr)
-  (ffi-write ffi-context "r" (get type 'ffi-code))
+  (ffi-write ffi-context "r" (get ty 'ffi-code))
   (ffi-pop ffi-context))
 
-(defun ffi-read-array (pointer type length)
+(defun ffi-read-array (ptr ty len)
   "Reads an array of values."
-  (let ((l nil)
-        (x (- length 1)))
-    (while (>= x 0)
-      (setq l (cons (ffi-deref pointer type x) l))
-      (setq x (- x (ffi-sizeof type))))
-    l))
+  (ffi-ensure)
+  (ffi-push ffi-context :uint64 len)
+  (ffi-push ffi-context :pointer ptr)
+  (ffi-write ffi-context "A" (get ty 'ffi-code))
+  (ffi-read ffi-context))
 
 (defun ffi-read-struct (pointer struct)
   "Reads a struct from a pointer. A struct is specified as a list of types and

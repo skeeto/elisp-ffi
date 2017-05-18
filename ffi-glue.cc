@@ -277,6 +277,45 @@ public:
         stack.push(out);
     }
 
+    void read_array() {
+        int type = std::cin.get();
+        void* raw_ptr = stack.pop().value.ptr;
+        size_t length = stack.pop().value.u64;
+		out_ << '(';
+        switch(type) {
+        case 'u': {
+			uint8_t* ptr = static_cast<uint8_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << static_cast<unsigned int>(ptr[i]) << ' ';
+			}
+            break;
+        case 'v':
+            break;
+        case 'w':
+            break;
+        case 'x':
+            break;
+        case 'i':
+            break;
+        case 'j':
+            break;
+        case 'k':
+            break;
+        case 'l':
+            break;
+        case 'f':
+            break;
+        case 'd':
+            break;
+        case 'p':
+            break;
+        default:
+            std::cerr << "invalid type in read_array: " << static_cast<char>(type) << std::endl;
+            return;
+        }
+		out_ << ')';
+    }
+
     void free() { delete static_cast<char *>(stack.pop().value.ptr); }
 
     void size() {
@@ -475,6 +514,11 @@ int main() {
         case 'r':
             vm.read_mem();
             break;
+
+		/* array read from memory */
+		case 'A':
+			vm.read_array();
+			break;
 
         /* duplicate top value */
         case '!':
