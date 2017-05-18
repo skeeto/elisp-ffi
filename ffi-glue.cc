@@ -313,7 +313,7 @@ public:
             std::cerr << "invalid type in read_array: " << static_cast<char>(type) << std::endl;
             return;
         }
-		out_ << ')';
+		out_ << ")$";
     }
 
     void free() { delete static_cast<char *>(stack.pop().value.ptr); }
