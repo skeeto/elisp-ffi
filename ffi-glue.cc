@@ -289,31 +289,95 @@ public:
 				out_ << static_cast<unsigned int>(ptr[i]) << ' ';
 			}
             break;
-        case 'v':
+        case 'v': {
+			uint16_t* ptr = static_cast<uint16_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'w':
+        case 'w': {
+			uint32_t* ptr = static_cast<uint32_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'x':
+        case 'x': {
+			uint64_t* ptr = static_cast<uint64_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'i':
+        case 'i': {
+			int8_t* ptr = static_cast<int8_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << static_cast<int>(ptr[i]) << ' ';
+			}
             break;
-        case 'j':
+        case 'j': {
+			int16_t* ptr = static_cast<int16_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'k':
+        case 'k': {
+			int32_t* ptr = static_cast<int32_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'l':
+        case 'l': {
+			int64_t* ptr = static_cast<int64_t*>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
-        case 'f':
+        case 'f': {
+			float* ptr = static_cast<float*>(raw_ptr);
+			for(size_t i = 0; i < length; i++) {
+        		float value = ptr[i];
+		        if(std::isnan(value)) {
+		            out_ << "0.0e+NaN";
+		        } else if(std::isinf(value)) {
+        		    if(value < 0) {
+		                out_ << "-1.0e+INF";
+		            } else {
+        		        out_ << "1.0e+INF";
+        		    }
+		        } else {
+		            out_ << value;
+		        }
+				out_ << ' ';
+			}}
             break;
-        case 'd':
+        case 'd': {
+			double* ptr = static_cast<double*>(raw_ptr);
+			for(size_t i = 0; i < length; i++) {
+        		double value = ptr[i];
+		        if(std::isnan(value)) {
+		            out_ << "0.0e+NaN";
+		        } else if(std::isinf(value)) {
+        		    if(value < 0) {
+		                out_ << "-1.0e+INF";
+		            } else {
+        		        out_ << "1.0e+INF";
+        		    }
+		        } else {
+		            out_ << value;
+		        }
+				out_ << ' ';
+			}}
             break;
-        case 'p':
+        case 'p': {
+			void** ptr = static_cast<void**>(raw_ptr);
+			for(size_t i = 0; i < length; i++)
+				out_ << ptr[i] << ' ';
+			}
             break;
         default:
             std::cerr << "invalid type in read_array: " << static_cast<char>(type) << std::endl;
             return;
         }
-		out_ << ")$";
+		out_ << ")\n$";
     }
 
     void free() { delete static_cast<char *>(stack.pop().value.ptr); }
